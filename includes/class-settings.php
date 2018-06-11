@@ -89,6 +89,7 @@ if( !class_exists('RT_Profile_Notifications_settings') ){
 				'<input type="email" id="email_address" name="rt_profile_notifications_settings[email_address]" value="%s" class="regular-text ltr" />',
 				implode( ', ', $this->options['email_address'] )
 			);
+			echo '<p class="description">' . __( 'Insert one or more email addresses, separated by commas.', 'rt-profile-notifications' ) . '</p>';
 		}
 
 
