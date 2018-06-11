@@ -15,11 +15,16 @@
 if( !defined('ABSPATH') ){ exit; }
 
 
+// include the options page
+require_once( 'includes/class-settings.php' );
+
+
 if( !class_exists('RT_Profile_Notifications') ){
 
 	class RT_Profile_Notifications {
 
 		private $fields;
+		private $settings_class;
 
 		/**
 		 * Constructor
@@ -36,18 +41,23 @@ if( !class_exists('RT_Profile_Notifications') ){
 
 		public function init(){
 			// hook into profile updates
-			add_action( 'profile_update', array( $this, 'on_profile_update' ), 10, 2 ); 
+			add_action( 'profile_update', array( $this, 'on_profile_update' ), 10, 2 );
+			// instantiate the settings class
+			$this->settings_class = new RT_Profile_Notifications_settings();
+			$this->settings_class->init( $this->fields );
 		}
 
 
 		public function on_profile_update( $user_id, $old_user_data ){
+			// get the options
+			$options = get_option( 'rt_profile_notifications_settings' );
 			// empty changes string
 			$changes = '';
 			// get the current user object
 			$new_user_data = get_userdata( $user_id );
 			// loop through fields, check for changes
 			foreach( $this->fields as $key => $label ){
-				if( $new_user_data->{$key} != $old_user_data->{$key} ){
+				if( $new_user_data->{$key} != $old_user_data->{$key} && in_array( $key, $options['active_fields'] ) ){
 					if( $key != 'user_pass' ){
 						$changes .= $label . ': ' . $old_user_data->{$key} . ' -> ' . $new_user_data->{$key} . "\n";
 					} else {
@@ -57,7 +67,11 @@ if( !class_exists('RT_Profile_Notifications') ){
 			}
 			// send mail
 			if( !empty( $changes ) ){
-				$email = get_option('admin_email');
+				$options = get_option( 'rt_profile_notifications_settings' );
+				$email = $options[ 'email_address' ];
+				if( !is_email( $email ) ){
+					$email = get_option('admin_email');
+				}
 				$subject = get_option('blogname') . ' - ' . __('User profile updated.','rt-profile-notifications');
 				$message = sprintf( __( "User '%s' has updated their profile.", 'rt-profile-notifications' ), $old_user_data->user_login ) . "\n\n";
 				$message .= $changes;
