@@ -69,7 +69,7 @@ if( !class_exists('RT_Profile_Notifications') ){
 			if( !empty( $changes ) ){
 				$options = get_option( 'rt_profile_notifications_settings' );
 				$email = $options[ 'email_address' ];
-				if( !is_email( $email ) ){
+				if( empty( $email ) ){
 					$email = get_option('admin_email');
 				}
 				$subject = get_option('blogname') . ' - ' . __('User profile updated.','rt-profile-notifications');

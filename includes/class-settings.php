@@ -65,7 +65,7 @@ if( !class_exists('RT_Profile_Notifications_settings') ){
 
 
 		public function section_info_main(){
-			echo __( 'Please set your preferences below.', 'rt-profile-notifications' );
+			echo __( 'Please set your profile notification preferences below.', 'rt-profile-notifications' );
 		}
 
 
@@ -87,7 +87,7 @@ if( !class_exists('RT_Profile_Notifications_settings') ){
 		public function email_address_callback(){
 			printf(
 				'<input type="email" id="email_address" name="rt_profile_notifications_settings[email_address]" value="%s" class="regular-text ltr" />',
-				$this->options['email_address']
+				implode( ', ', $this->options['email_address'] )
 			);
 		}
 
@@ -104,8 +104,16 @@ if( !class_exists('RT_Profile_Notifications_settings') ){
 			}
 			$new_input['active_fields'] = $active_fields;
 
-			// store the email address
-			$new_input['email_address'] = is_email( $input['email_address'] ) ? $input['email_address'] : null ;
+			// store the email address(es)
+			$addresses = explode( ',', $input['email_address'] );
+			$addresses = array_map( 'trim', $addresses );
+			$valid_addresses = array();
+			foreach( $addresses as $a ){
+				if( is_email( $a ) ){
+					$valid_addresses[] = $a;
+				}
+			}
+			$new_input['email_address'] = $valid_addresses;
 
 			return $new_input;
 		}
